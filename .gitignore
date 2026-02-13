@@ -1,0 +1,19 @@
+# Python-generated files
+__pycache__/
+*/__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Training logs
+logs/
+wandb/
+*.log
+
+# AI-agent folders
+.claude/
