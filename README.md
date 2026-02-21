@@ -1,4 +1,6 @@
-# Rumi MJLab
+# Rumi mjlab environment
+
+![Rumi locomotion](teaser.gif)
 
 Reinforcement learning tasks for the Rumi quadruped robot using the mjlab framework.
 
