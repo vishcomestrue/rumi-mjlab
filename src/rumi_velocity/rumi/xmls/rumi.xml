@@ -10,10 +10,10 @@
     <default class="rumi">
       <!-- This globaly disables all collisions. -->
       <geom condim="1" contype="0" conaffinity="0"/>
-      <!-- Joint damping and armature provide numerical stability -->
-      <joint pos="0 0 0" axis="0 1 0" damping="0.5" armature="0.005"/>
+      <!-- Desired joint damping: 0.5; armature: 0.005 -->
+      <joint pos="0 0 0" axis="0 1 0" damping="0.5"/>
       <!-- kp: position gain, kv: velocity gain (derivative damping), forcerange: actuator limits -->
-      <position inheritrange="1" kp="10" kv="0" forcerange="-4.0 4.0"/>
+      <!-- <position inheritrange="1" kp="10" kv="0" forcerange="-4.0 4.0"/> -->
       <!-- Joint ranges and constants for section of legs -->
       <default class="hip">
         <joint axis="1 0 0" range="-0.5 0.5"/>
@@ -213,7 +213,7 @@
     </body>
   </worldbody>
 
-  <actuator>
+  <!-- <actuator>
     <position class="hip" name="FL_hip" joint="FL_hip_joint"/>
     <position class="thigh" name="FL_thigh" joint="FL_thigh_joint"/>
     <position class="calf" name="FL_calf" joint="FL_calf_joint"/>
@@ -226,7 +226,7 @@
     <position class="hip" name="BR_hip" joint="BR_hip_joint"/>
     <position class="thigh" name="BR_thigh" joint="BR_thigh_joint"/>
     <position class="calf" name="BR_calf" joint="BR_calf_joint"/>
-  </actuator>
+  </actuator> -->
 
   <sensor>
     <!-- IMU-based sensors mounted on body -->
