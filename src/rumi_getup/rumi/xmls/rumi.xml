@@ -1,9 +1,9 @@
 <mujoco model="Rumi Quadruped">
   <compiler angle="radian" meshdir="assets" eulerseq="zyx"/>
 
-  <option iterations="1" ls_iterations="5" timestep="0.004" integrator="Euler">
+  <!-- <option iterations="1" ls_iterations="5" timestep="0.004" integrator="Euler">
     <flag eulerdamp="disable"/>
-  </option>
+  </option> -->
 
   <!-- Global Settings -->
   <default>
@@ -11,9 +11,11 @@
       <!-- This globaly disables all collisions. -->
       <geom condim="1" contype="0" conaffinity="0"/>
       <!-- Joint damping and armature provide numerical stability -->
-      <joint pos="0 0 0" axis="0 1 0" damping="0.5" armature="0.005"/>
+      <!-- <joint pos="0 0 0" axis="0 1 0" damping="0.5" armature="0.005"/> -->
+      <!-- <joint pos="0 0 0" axis="0 1 0"/> -->
+      <joint pos="0 0 0" axis="0 1 0" armature="0.031" damping="0.794" frictionloss="0.008453"/>
       <!-- kp: position gain, kv: velocity gain (derivative damping), forcerange: actuator limits -->
-      <position inheritrange="1" kp="10" kv="0" forcerange="-4.0 4.0"/>
+      <!-- <position inheritrange="1" kp="10" kv="0" forcerange="-6.0 6.0"/> -->
       <!-- Joint ranges and constants for section of legs -->
       <default class="hip">
         <joint axis="1 0 0" range="-0.5 0.5"/>
@@ -123,7 +125,7 @@
           <!-- <site name="FL_thigh_com" pos="-0.10348 -0.0014 0.000274" quat="1 0 0 0" size="0.01" rgba="1 0 0 1"/> -->
           <body name="FL_calf" pos="-0.20214 0 -0.038" quat="1 0 0 0">
             <inertial pos="0.1222 -0.01698 0" quat="1 0 0 0" mass="0.058" diaginertia="0.00003 0.0002 0.0002"/>
-            <joint class="calf" name="FL_calf_joint" axis="0 -1 0" range="-1.04 0.76"/>
+            <joint class="calf" name="FL_calf_joint" axis="0 -1 0" range="-1.51 0.1"/>
             <geom class="visual" mesh="calf" material="calf_mat"/>
             <!-- Calf/Lower Leg Collisions -->
             <geom name="FL_calf_collision1" class="lower_leg_collision1"/>
@@ -149,7 +151,7 @@
           <geom name="FR_thigh_collision2" class="upper_leg_collision2"/>
           <body name="FR_calf" pos="-0.20214 0 -0.038" quat="1 0 0 0">
             <inertial pos="0.1222 -0.01698 0" quat="1 0 0 0" mass="0.058" diaginertia="0.00003 0.0002 0.0002"/>
-            <joint class="calf" name="FR_calf_joint" range="-0.76 1.04"/>
+            <joint class="calf" name="FR_calf_joint" range="-0.1 1.51"/>
             <geom class="visual" mesh="calf" material="calf_mat"/>
             <!-- Calf/Lower Leg Collisions -->
             <geom name="FR_calf_collision1" class="lower_leg_collision1"/>
@@ -174,7 +176,7 @@
           <geom name="BL_thigh_collision2" class="upper_leg_collision2"/>
           <body name="BL_calf" pos="-0.20214 0 -0.038" quat="1 0 0 0">
             <inertial pos="0.1222 -0.01698 0" quat="1 0 0 0" mass="0.058" diaginertia="0.00003 0.0002 0.0002"/>
-            <joint class="calf" name="BL_calf_joint" axis="0 -1 0" range="-1.04 0.76"/>
+            <joint class="calf" name="BL_calf_joint" axis="0 -1 0" range="-1.51 0.1"/>
             <geom class="visual" mesh="calf" material="calf_mat"/>
             <!-- Calf/Lower Leg Collisions -->
             <geom name="BL_calf_collision1" class="lower_leg_collision1"/>
@@ -200,7 +202,7 @@
           <geom name="BR_thigh_collision2" class="upper_leg_collision2"/>
           <body name="BR_calf" pos="-0.20214 0 -0.038" quat="1 0 0 0">
             <inertial pos="0.1222 -0.01698 0" quat="1 0 0 0" mass="0.058" diaginertia="0.00003 0.0002 0.0002"/>
-            <joint class="calf" name="BR_calf_joint" range="-0.76 1.04"/>
+            <joint class="calf" name="BR_calf_joint" range="-0.1 1.51"/>
             <geom class="visual" mesh="calf" material="calf_mat"/>
             <!-- Calf/Lower Leg Collisions -->
             <geom name="BR_calf_collision1" class="lower_leg_collision1"/>
@@ -213,7 +215,7 @@
     </body>
   </worldbody>
 
-  <actuator>
+  <!-- <actuator>
     <position class="hip" name="FL_hip" joint="FL_hip_joint"/>
     <position class="thigh" name="FL_thigh" joint="FL_thigh_joint"/>
     <position class="calf" name="FL_calf" joint="FL_calf_joint"/>
@@ -226,7 +228,7 @@
     <position class="hip" name="BR_hip" joint="BR_hip_joint"/>
     <position class="thigh" name="BR_thigh" joint="BR_thigh_joint"/>
     <position class="calf" name="BR_calf" joint="BR_calf_joint"/>
-  </actuator>
+  </actuator> -->
 
   <sensor>
     <!-- IMU-based sensors mounted on body -->

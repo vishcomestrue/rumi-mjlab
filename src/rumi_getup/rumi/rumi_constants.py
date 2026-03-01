@@ -34,16 +34,19 @@ def get_spec() -> mujoco.MjSpec:
 # Actuator config.
 ##
 
-EFFORT_LIMIT = 4.0
-ARMATURE = 0.005
+EFFORT_LIMIT = 6.0
+ARMATURE = 0.031
+# FRICTIONLOSS = 0.008453
 
 # PD gains derived from armature, targeting 6 Hz natural frequency.
 NATURAL_FREQ = 1 * 2.0 * 3.1415926535  # 6 Hz
 DAMPING_RATIO = 2.0
 
 # Base stiffness for hip/thigh
-STIFFNESS = ARMATURE * NATURAL_FREQ**2
-DAMPING = 2 * DAMPING_RATIO * ARMATURE * NATURAL_FREQ
+# STIFFNESS = ARMATURE * NATURAL_FREQ**2
+# DAMPING = 2 * DAMPING_RATIO * ARMATURE * NATURAL_FREQ
+STIFFNESS = 10.0
+DAMPING = 0.0
 
 # Separate actuator configs for hip/thigh vs calf
 RUMI_ACTUATOR = BuiltinPositionActuatorCfg(
@@ -52,6 +55,7 @@ RUMI_ACTUATOR = BuiltinPositionActuatorCfg(
   damping=DAMPING,
   effort_limit=EFFORT_LIMIT,
   armature=ARMATURE,
+  # frictionloss=FRICTIONLOSS,
 )
 
 ##
