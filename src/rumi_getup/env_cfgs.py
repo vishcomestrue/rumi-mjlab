@@ -3,11 +3,13 @@
 from mjlab.envs import ManagerBasedRlEnvCfg
 from mjlab.envs.mdp.actions import JointPositionActionCfg
 from mjlab.managers.curriculum_manager import CurriculumTermCfg
+from mjlab.managers.observation_manager import ObservationTermCfg
 from mjlab.managers.reward_manager import RewardTermCfg
 from mjlab.sensor import ContactMatch, ContactSensorCfg
 from mjlab.tasks.getup import mdp as getup_mdp
 from mjlab.tasks.getup.getup_env_cfg import GetupTaskCfg, make_getup_env_cfg
 
+from rumi_getup.mdp import observations as rumi_mdp
 from rumi_getup.rumi.rumi_constants import (
     RUMI_ACTION_SCALE,
     get_rumi_robot_cfg,
@@ -137,7 +139,13 @@ def rumi_getup_env_cfg(play: bool = False) -> ManagerBasedRlEnvCfg:
     del cfg.observations["actor"].terms["base_lin_vel"]
     del cfg.observations["critic"].terms["base_lin_vel"]
     del cfg.observations["actor"].terms["base_ang_vel"]
-    del cfg.observations["critic"].terms["base_ang_vel"] 
+    del cfg.observations["critic"].terms["base_ang_vel"]
+
+    # Replace ground-truth height with FK estimate (encoder + IMU only).
+    # Uses rumi.xml "orientation" framequat sensor scoped to "robot" entity.
+    fk_height_term = ObservationTermCfg(func=rumi_mdp.fk_body_height)
+    cfg.observations["actor"].terms["body_height"] = fk_height_term
+    cfg.observations["critic"].terms["body_height"] = fk_height_term
     
     # ==================================================================
     # Reward Weight Tuning (Set to 0 to disable, adjust to test)
@@ -151,10 +159,10 @@ def rumi_getup_env_cfg(play: bool = False) -> ManagerBasedRlEnvCfg:
     # cfg.rewards["hip_stability"].weight = 0.5  # Default: 0.3
 
     # Joint velocity smoothness
-    # cfg.rewards["dof_vel"].weight = 0.001  # Default: 0.001
+    cfg.rewards["dof_vel"].weight = 0.01  # Default: 0.001
 
     # Torque minimization
-    # cfg.rewards["torques"].weight = 0.0001  # Default: 0.0001
+    cfg.rewards["torques"].weight = 0.001  # Default: 0.0001
 
     # To test incrementally, enable ONE at a time:
     # Step 1: Enable joint_symmetry (set to 0.5)
@@ -171,17 +179,17 @@ def rumi_getup_env_cfg(play: bool = False) -> ManagerBasedRlEnvCfg:
 
     # In play mode, fix the target height so behaviour is deterministic.
     if play:
-        cfg.events["randomize_target_height"].params["min_height"] = 0.16
-        cfg.events["randomize_target_height"].params["max_height"] = 0.16
+        cfg.events["randomize_target_height"].params["min_height"] = 0.20
+        cfg.events["randomize_target_height"].params["max_height"] = 0.30
 
     cfg.curriculum["target_height"] = CurriculumTermCfg(
         func=getup_mdp.target_height_curriculum,
         params={
             "height_stages": [
-                {"step": 0, "min_height": 0.21, "max_height": 0.23},
-                {"step": 1000 * 24, "min_height": 0.18, "max_height": 0.26},
-                {"step": 2000 * 24, "min_height": 0.16, "max_height": 0.28},
-                {"step": 3000 * 24, "min_height": 0.14, "max_height": 0.30},
+                {"step": 0, "min_height": 0.24, "max_height": 0.25},
+                {"step": 1500 * 24, "min_height": 0.21, "max_height": 0.28},
+                {"step": 3000 * 24, "min_height": 0.18, "max_height": 0.31},
+                # {"step": 3000 * 24, "min_height": 0.14, "max_height": 0.30},
             ],
         },
     )
