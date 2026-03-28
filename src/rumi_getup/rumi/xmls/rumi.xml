@@ -12,8 +12,10 @@
       <geom condim="1" contype="0" conaffinity="0"/>
       <!-- Joint damping and armature provide numerical stability -->
       <!-- <joint pos="0 0 0" axis="0 1 0" damping="0.5" armature="0.005"/> -->
-      <!-- <joint pos="0 0 0" axis="0 1 0"/> -->
-      <joint pos="0 0 0" axis="0 1 0" armature="0.031" damping="0.794" frictionloss="0.008453"/>
+      <!-- <joint pos="0 0 0" axis="0 1 0" armature="0.031" damping="0.794" frictionloss="0.008453"/> -->
+      <!-- <joint pos="0 0 0" axis="0 1 0" armature="0.012" damping="0.794" frictionloss="0.008453"/> -->
+      <!-- New a, d and f after the proper sysid -->
+      <!-- <joint pos="0 0 0" axis="0 1 0" armature="0.02" damping="0.45" frictionloss="0.01"/> -->
       <!-- kp: position gain, kv: velocity gain (derivative damping), forcerange: actuator limits -->
       <!-- <position inheritrange="1" kp="10" kv="0" forcerange="-6.0 6.0"/> -->
       <!-- Joint ranges and constants for section of legs -->
