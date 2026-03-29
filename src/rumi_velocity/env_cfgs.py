@@ -4,8 +4,10 @@ from mjlab.envs import ManagerBasedRlEnvCfg
 from mjlab.envs import mdp as envs_mdp
 from mjlab.envs.mdp.actions import JointPositionActionCfg
 from mjlab.managers.event_manager import EventTermCfg
+from mjlab.managers.observation_manager import ObservationTermCfg
 from mjlab.managers.termination_manager import TerminationTermCfg
 from mjlab.sensor import ContactMatch, ContactSensorCfg
+from mjlab.utils.noise import UniformNoiseCfg as Unoise
 from mjlab.tasks.velocity import mdp
 from mjlab.tasks.velocity.velocity_env_cfg import make_velocity_env_cfg
 from mjlab.tasks.velocity.mdp import UniformVelocityCommandCfg
@@ -82,6 +84,23 @@ def rumi_rough_env_cfg(play: bool = False) -> ManagerBasedRlEnvCfg:
   cfg.observations["actor"].terms.pop("height_scan", None)
   cfg.observations["critic"].terms.pop("height_scan", None)
 
+  # Remove velocity estimate and gravity projection (replaced by accelerometer)
+  cfg.observations["actor"].terms.pop("base_lin_vel", None)
+  # cfg.observations["critic"].terms.pop("base_lin_vel", None)
+  # cfg.observations["actor"].terms.pop("projected_gravity", None)
+  # cfg.observations["critic"].terms.pop("projected_gravity", None)
+
+  # Add accelerometer observation (replaces base_lin_vel + projected_gravity)
+  cfg.observations["actor"].terms["imu_lin_acc"] = ObservationTermCfg(
+    func=mdp.builtin_sensor,
+    params={"sensor_name": "robot/imu_lin_acc"},
+    noise=Unoise(n_min=-0.5, n_max=0.5),
+  )
+  cfg.observations["critic"].terms["imu_lin_acc"] = ObservationTermCfg(
+    func=mdp.builtin_sensor,
+    params={"sensor_name": "robot/imu_lin_acc"},
+  )
+
   cfg.events["foot_friction"].params["asset_cfg"].geom_names = geom_names
   cfg.events["base_com"].params["asset_cfg"].body_names = ("body",)
 
@@ -116,14 +135,16 @@ def rumi_rough_env_cfg(play: bool = False) -> ManagerBasedRlEnvCfg:
   cfg.rewards["pose"].weight = 1.0
   cfg.rewards["dof_pos_limits"].weight = -1.0
   cfg.rewards["action_rate_l2"].weight = -0.1
-  cfg.rewards["foot_clearance"].weight = -2.0
-  cfg.rewards["foot_swing_height"].weight = -0.25
+  # cfg.rewards["foot_clearance"].weight = -2.0
+  # cfg.rewards["foot_swing_height"].weight = -0.25
   cfg.rewards["foot_slip"].weight = -0.1
   cfg.rewards["soft_landing"].weight = -1e-5
   # Keep disabled (same as Go1)
   cfg.rewards["body_ang_vel"].weight = 0.0
   cfg.rewards["angular_momentum"].weight = 0.0
   cfg.rewards["air_time"].weight = 0.0
+  cfg.rewards["foot_clearance"].weight = 0.0
+  cfg.rewards["foot_swing_height"].weight = 0.0
 
   cfg.terminations["illegal_contact"] = TerminationTermCfg(
     func=mdp.illegal_contact,
@@ -173,11 +194,12 @@ def rumi_flat_env_cfg(play: bool = False) -> ManagerBasedRlEnvCfg:
 
   # Disable terrain curriculum (not present in play mode since rough clears all).
   cfg.curriculum.pop("terrain_levels", None)
+  cfg.curriculum.pop("command_vel", None)
 
   if play:
     twist_cmd = cfg.commands["twist"]
     assert isinstance(twist_cmd, UniformVelocityCommandCfg)
-    twist_cmd.ranges.lin_vel_x = (-1.5, 2.0)
-    twist_cmd.ranges.ang_vel_z = (-0.7, 0.7)
+    twist_cmd.ranges.lin_vel_x = (-1.0, 1.0)
+    twist_cmd.ranges.ang_vel_z = (-1.0, 1.0)
 
   return cfg
