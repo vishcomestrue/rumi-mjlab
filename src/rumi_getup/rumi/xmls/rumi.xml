@@ -103,8 +103,9 @@
       
       <!-- <site name="body_mid" pos="-0.140 -0.054 0" quat="1 0 0 0" size="0.01" rgba="1 0 0 1"/> -->
       <!-- TODO: Add sites for IMU and other sensors if required -->
-      <site name="imu" pos="-0.205 -0.057 -0.004" quat="1 0 0 0" size="0.015" rgba="1 0 0 1"/>
-      
+      <!-- <site name="imu" pos="-0.205 -0.057 -0.004" quat="1 0 0 0" size="0.015" rgba="1 0 0 1"/> -->
+      <site name="imu" pos="-0.20 -0.055 0.037" quat="1 0 0 0" type="box" size="0.018 0.012 0.002" rgba="1 0 0 1"/>
+
       <!-- Upvector arrow visualization -->
       <!-- <geom name="upvector_arrow" type="cylinder" size="0.005 0.08" pos="-0.174 -0.054 0.08"
             material="upvector_arrow" contype="0" conaffinity="0" group="2" />
