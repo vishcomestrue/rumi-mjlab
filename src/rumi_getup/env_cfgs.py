@@ -9,7 +9,7 @@ from mjlab.sensor import ContactMatch, ContactSensorCfg
 from mjlab.tasks.getup import mdp as getup_mdp
 from mjlab.tasks.getup.getup_env_cfg import GetupTaskCfg, make_getup_env_cfg
 
-from rumi_getup.mdp import observations as rumi_mdp
+import rumi_getup.mdp as rumi_mdp
 from rumi_getup.rumi.rumi_constants import (
     RUMI_ACTION_SCALE,
     get_rumi_robot_cfg,
@@ -98,6 +98,29 @@ def rumi_getup_env_cfg(play: bool = False) -> ManagerBasedRlEnvCfg:
     # Customize simulation settings for Rumi
     cfg.sim.mujoco.ccd_iterations = 500
     cfg.sim.contact_sensor_maxmatch = 500
+
+    # Contact sensor: detect foot-ground contact per foot (FL, FR, BL, BR)
+    foot_contact_cfg = ContactSensorCfg(
+        name="foot_ground_touch",
+        primary=ContactMatch(
+            mode="geom",
+            entity="robot",
+            pattern=r"(FL|FR|BL|BR)_foot_collision",
+        ),
+        secondary=ContactMatch(mode="body", pattern="terrain"),
+        fields=("found",),
+        reduce="none",
+        num_slots=1,
+    )
+    cfg.scene.sensors = (cfg.scene.sensors or ()) + (foot_contact_cfg,)
+
+    # Penalize any foot not in contact with the ground.
+    # With all 4 feet grounded: 0. Each lifted foot adds -1 penalty.
+    cfg.rewards["foot_contact"] = RewardTermCfg(
+        func=rumi_mdp.foot_contact_penalty,
+        weight=0.5,
+        params={"sensor_name": foot_contact_cfg.name},
+    )
 
     # Contact sensor: detect non-foot geoms touching the terrain
     nonfoot_ground_cfg = ContactSensorCfg(
