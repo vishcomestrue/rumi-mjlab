@@ -1,17 +1,14 @@
 <mujoco model="Rumi Quadruped">
   <compiler angle="radian" meshdir="assets" eulerseq="zyx"/>
 
-  <option iterations="1" ls_iterations="5" timestep="0.004" integrator="Euler">
-    <flag eulerdamp="disable"/>
-  </option>
-
   <!-- Global Settings -->
   <default>
     <default class="rumi">
       <!-- This globaly disables all collisions. -->
       <geom condim="1" contype="0" conaffinity="0"/>
       <!-- Desired joint damping: 0.5; armature: 0.005 -->
-      <joint pos="0 0 0" axis="0 1 0" damping="0.5"/>
+      <!-- <joint pos="0 0 0" axis="0 1 0" damping="0.5"/> -->
+      <!-- <joint pos="0 0 0" axis="0 1 0" armature="0.031" damping="0.794" frictionloss="0.008453"/> -->
       <!-- kp: position gain, kv: velocity gain (derivative damping), forcerange: actuator limits -->
       <!-- <position inheritrange="1" kp="10" kv="0" forcerange="-4.0 4.0"/> -->
       <!-- Joint ranges and constants for section of legs -->
@@ -99,7 +96,8 @@
       
       <!-- <site name="body_mid" pos="-0.140 -0.054 0" quat="1 0 0 0" size="0.01" rgba="1 0 0 1"/> -->
       <!-- TODO: Add sites for IMU and other sensors if required -->
-      <site name="imu" pos="-0.205 -0.057 -0.004" quat="1 0 0 0" size="0.015" rgba="1 0 0 1"/>
+      <!-- <site name="imu" pos="-0.205 -0.057 -0.004" quat="1 0 0 0" size="0.015" rgba="1 0 0 1"/> -->
+      <site name="imu" pos="-0.20 -0.055 0.037" quat="1 0 0 0" type="box" size="0.018 0.012 0.002" rgba="1 0 0 1"/>
       
       <!-- Upvector arrow visualization -->
       <!-- <geom name="upvector_arrow" type="cylinder" size="0.005 0.08" pos="-0.174 -0.054 0.08"
@@ -232,7 +230,7 @@
     <!-- IMU-based sensors mounted on body -->
     <gyro site="imu" name="imu_ang_vel"/>
     <velocimeter site="imu" name="imu_lin_vel"/>
-    <accelerometer site="imu" name="accelerometer"/>
+    <accelerometer site="imu" name="imu_lin_acc"/>
     <framepos objtype="site" objname="imu" name="position"/>
     <framezaxis objtype="site" objname="imu" name="upvector"/>
     <framexaxis objtype="site" objname="imu" name="forwardvector"/>
