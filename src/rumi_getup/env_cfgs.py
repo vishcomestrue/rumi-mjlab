@@ -202,15 +202,15 @@ def rumi_getup_env_cfg(play: bool = False) -> ManagerBasedRlEnvCfg:
 
     # In play mode, fix the target height so behaviour is deterministic.
     if play:
-        cfg.events["randomize_target_height"].params["min_height"] = 0.20
-        cfg.events["randomize_target_height"].params["max_height"] = 0.30
+        cfg.events["randomize_target_height"].params["min_height"] = 0.21
+        cfg.events["randomize_target_height"].params["max_height"] = 0.28
 
     cfg.curriculum["target_height"] = CurriculumTermCfg(
         func=getup_mdp.target_height_curriculum,
         params={
             "height_stages": [
                 {"step": 0, "min_height": 0.24, "max_height": 0.25},
-                {"step": 1500 * 24, "min_height": 0.21, "max_height": 0.28},
+                {"step": 2000 * 24, "min_height": 0.21, "max_height": 0.28},
                 {"step": 3000 * 24, "min_height": 0.18, "max_height": 0.31},
                 # {"step": 3000 * 24, "min_height": 0.14, "max_height": 0.30},
             ],
