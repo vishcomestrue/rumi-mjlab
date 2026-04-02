@@ -1,8 +1,11 @@
 """Rumi velocity environment configurations."""
 
+import math
+
 from mjlab.envs import ManagerBasedRlEnvCfg
 from mjlab.envs import mdp as envs_mdp
 from mjlab.envs.mdp.actions import JointPositionActionCfg
+from mjlab.managers.curriculum_manager import CurriculumTermCfg
 from mjlab.managers.event_manager import EventTermCfg
 from mjlab.managers.observation_manager import ObservationTermCfg
 from mjlab.managers.termination_manager import TerminationTermCfg
@@ -12,10 +15,38 @@ from mjlab.tasks.velocity import mdp
 from mjlab.tasks.velocity.velocity_env_cfg import make_velocity_env_cfg
 from mjlab.tasks.velocity.mdp import UniformVelocityCommandCfg
 
+from rumi_velocity.rumi_velocity_command import RumiVelocityCommandCfg
+
 from rumi_velocity.rumi.rumi_constants import (
   RUMI_ACTION_SCALE,
   get_rumi_robot_cfg,
 )
+
+##
+# Velocity sampling ranges and curriculum (edit here to change command distribution)
+##
+
+VELOCITY_RANGES = UniformVelocityCommandCfg.Ranges(
+  lin_vel_x=(-0.5, 0.5),
+  lin_vel_y=(-0.5, 0.5),
+  ang_vel_z=(-0.5, 0.5),
+  heading=(-math.pi, math.pi),
+)
+
+# VELOCITY_CURRICULUM = [
+#   {"step": 0,          "lin_vel_x": (-0.5, 0.5), "ang_vel_z": (-0.5, 0.5)},
+#   {"step": 3000 * 24,  "lin_vel_x": (-0.7, 1.0), "ang_vel_z": (-0.7, 0.7)},
+# ]
+
+##
+# Reward curriculum (edit here to change reward weight progression)
+##
+
+SOFT_LANDING_CURRICULUM = [
+  {"step": 0,           "weight": -1e-5},
+  {"step": 6000 * 24,   "weight": -1e-4},
+  {"step": 12000 * 24,  "weight": -1e-3},
+]
 
 
 def _configure_rumi(cfg: ManagerBasedRlEnvCfg, play: bool = False) -> None:
@@ -143,9 +174,19 @@ def _configure_rumi(cfg: ManagerBasedRlEnvCfg, play: bool = False) -> None:
     params={"sensor_name": nonfoot_ground_cfg.name},
   )
 
-  cmd = cfg.commands["twist"]
-  assert isinstance(cmd, UniformVelocityCommandCfg)
-  cmd.viz.z_offset = 0.5
+  existing_cmd = cfg.commands["twist"]
+  assert isinstance(existing_cmd, UniformVelocityCommandCfg)
+  cfg.commands["twist"] = RumiVelocityCommandCfg(
+    entity_name=existing_cmd.entity_name,
+    resampling_time_range=existing_cmd.resampling_time_range,
+    rel_standing_envs=existing_cmd.rel_standing_envs,
+    rel_heading_envs=existing_cmd.rel_heading_envs,
+    heading_command=existing_cmd.heading_command,
+    heading_control_stiffness=existing_cmd.heading_control_stiffness,
+    debug_vis=existing_cmd.debug_vis,
+    ranges=VELOCITY_RANGES,
+    viz=UniformVelocityCommandCfg.VizCfg(z_offset=0.5),
+  )
 
   # Apply play mode overrides.
   if play:
@@ -200,14 +241,35 @@ def rumi_flat_env_cfg(play: bool = False) -> ManagerBasedRlEnvCfg:
   cfg.scene.terrain.terrain_type = "plane"
   cfg.scene.terrain.terrain_generator = None
 
-  # Disable terrain curriculum (not applicable to flat terrain).
+  # Terrain curriculum - not applicable to flat terrain.
   cfg.curriculum.pop("terrain_levels", None)
+  
+  # Reward curriculum
+  ## Increase soft landing penalty as training progresses.
+  cfg.curriculum["soft_landing_weight"] = CurriculumTermCfg(
+    func=mdp.reward_weight,
+    params={
+      "reward_name": "soft_landing",
+      "weight_stages": SOFT_LANDING_CURRICULUM,
+    },
+  )
+
+  # Velocity command curriculum
   cfg.curriculum.pop("command_vel", None)
+  # Replace default velocity curriculum with Rumi-specific stages.
+  # cfg.curriculum["command_vel"] = CurriculumTermCfg(
+  #   func=mdp.commands_vel,
+  #   params={
+  #     "command_name": "twist",
+  #     "velocity_stages": VELOCITY_CURRICULUM,
+  #   },
+  # )
 
   if play:
     twist_cmd = cfg.commands["twist"]
-    assert isinstance(twist_cmd, UniformVelocityCommandCfg)
-    twist_cmd.ranges.lin_vel_x = (-1.0, 1.0)
-    twist_cmd.ranges.ang_vel_z = (-1.0, 1.0)
+    assert isinstance(twist_cmd, RumiVelocityCommandCfg)
+    twist_cmd.ranges.lin_vel_x = (-0.5, 0.5)
+    twist_cmd.ranges.lin_vel_y = (-0.5, 0.5)
+    twist_cmd.ranges.ang_vel_z = (-0.5, 0.5)
 
   return cfg
