@@ -18,13 +18,8 @@ from rumi_velocity.rumi.rumi_constants import (
 )
 
 
-def rumi_rough_env_cfg(play: bool = False) -> ManagerBasedRlEnvCfg:
-  """Create Rumi rough terrain velocity configuration."""
-  cfg = make_velocity_env_cfg()
-
-  cfg.sim.mujoco.ccd_iterations = 500
-  cfg.sim.contact_sensor_maxmatch = 500
-
+def _configure_rumi(cfg: ManagerBasedRlEnvCfg, play: bool = False) -> None:
+  """Apply all Rumi-specific settings to a base velocity env cfg in-place."""
   cfg.scene.entities = {"robot": get_rumi_robot_cfg()}
 
   foot_names = ("FL", "FR", "BL", "BR")
@@ -64,9 +59,6 @@ def rumi_rough_env_cfg(play: bool = False) -> ManagerBasedRlEnvCfg:
   cfg.scene.sensors = tuple(
     s for s in (cfg.scene.sensors or ()) if s.name != "terrain_scan"
   )
-
-  if cfg.scene.terrain is not None and cfg.scene.terrain.terrain_generator is not None:
-    cfg.scene.terrain.terrain_generator.curriculum = True
 
   joint_pos_action = cfg.actions["joint_pos"]
   assert isinstance(joint_pos_action, JointPositionActionCfg)
@@ -169,6 +161,20 @@ def rumi_rough_env_cfg(play: bool = False) -> ManagerBasedRlEnvCfg:
       params={},
     )
 
+
+def rumi_rough_env_cfg(play: bool = False) -> ManagerBasedRlEnvCfg:
+  """Create Rumi rough terrain velocity configuration."""
+  cfg = make_velocity_env_cfg()
+
+  cfg.sim.mujoco.ccd_iterations = 500
+  cfg.sim.contact_sensor_maxmatch = 500
+
+  _configure_rumi(cfg, play=play)
+
+  if cfg.scene.terrain is not None and cfg.scene.terrain.terrain_generator is not None:
+    cfg.scene.terrain.terrain_generator.curriculum = True
+
+  if play:
     if cfg.scene.terrain is not None:
       if cfg.scene.terrain.terrain_generator is not None:
         cfg.scene.terrain.terrain_generator.curriculum = False
@@ -181,18 +187,20 @@ def rumi_rough_env_cfg(play: bool = False) -> ManagerBasedRlEnvCfg:
 
 def rumi_flat_env_cfg(play: bool = False) -> ManagerBasedRlEnvCfg:
   """Create Rumi flat terrain velocity configuration."""
-  cfg = rumi_rough_env_cfg(play=play)
+  cfg = make_velocity_env_cfg()
 
   cfg.sim.njmax = 300
   cfg.sim.mujoco.ccd_iterations = 50
   cfg.sim.contact_sensor_maxmatch = 64
+
+  _configure_rumi(cfg, play=play)
 
   # Switch to flat terrain.
   assert cfg.scene.terrain is not None
   cfg.scene.terrain.terrain_type = "plane"
   cfg.scene.terrain.terrain_generator = None
 
-  # Disable terrain curriculum (not present in play mode since rough clears all).
+  # Disable terrain curriculum (not applicable to flat terrain).
   cfg.curriculum.pop("terrain_levels", None)
   cfg.curriculum.pop("command_vel", None)
 
