@@ -6,11 +6,9 @@
     <default class="rumi">
       <!-- This globaly disables all collisions. -->
       <geom condim="1" contype="0" conaffinity="0"/>
-      <!-- Desired joint damping: 0.5; armature: 0.005 -->
-      <!-- <joint pos="0 0 0" axis="0 1 0" damping="0.5"/> -->
-      <!-- <joint pos="0 0 0" axis="0 1 0" armature="0.031" damping="0.794" frictionloss="0.008453"/> -->
+      <!-- <joint pos="0 0 0" axis="0 1 0" armature="0.01623" damping="0.59436" frictionloss="0.001"/> -->
       <!-- kp: position gain, kv: velocity gain (derivative damping), forcerange: actuator limits -->
-      <!-- <position inheritrange="1" kp="10" kv="0" forcerange="-4.0 4.0"/> -->
+      <!-- <position inheritrange="1" kp="20" kv="0" forcerange="-4.0 4.0"/> -->
       <!-- Joint ranges and constants for section of legs -->
       <default class="hip">
         <joint axis="1 0 0" range="-0.5 0.5"/>
@@ -76,7 +74,7 @@
 
   <worldbody>
     <!-- <light name="spotlight" mode="targetbodycom" target="body" pos="0 -1 2"/> -->
-    <body name="body" pos="0 0 0.15" quat="1 0 0 0" childclass="rumi">
+    <body name="body" pos="0 0 0.25" quat="1 0 0 0" childclass="rumi">
       <!-- TODO: Add camera views -->
       <camera name="side" pos="-0.214 -1.257 0.053" xyaxes="1.000 -0.013 -0.000 -0.000 -0.004 1.000" mode="trackcom"/>
       <inertial pos="-0.140 -0.054 0" quat="1 0 0 0" mass="0.8" diaginertia="0.0001 0.002 0.002"/>

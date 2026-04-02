@@ -65,17 +65,17 @@ RUMI_ACTUATOR = BuiltinPositionActuatorCfg(
 ##
 
 INIT_STATE = EntityCfg.InitialStateCfg(
-  pos=(0.0, 0.0, 0.2),
+  pos=(0.0, 0.0, 0.25),
   joint_pos={
     ".*_hip_joint": 0.0,
-    "FL_thigh_joint": 0,
-    "FR_thigh_joint": 0,
-    "BL_thigh_joint": 0,
-    "BR_thigh_joint": 0,
-    "FL_calf_joint": 0,
-    "FR_calf_joint": 0,
-    "BL_calf_joint": 0,
-    "BR_calf_joint": 0,
+    "FL_thigh_joint": -0.0705,
+    "FR_thigh_joint": 0.0705,
+    "BL_thigh_joint": -0.0705,
+    "BR_thigh_joint": 0.0705,
+    "FL_calf_joint": -0.113,
+    "FR_calf_joint": 0.113,
+    "BL_calf_joint": -0.113,
+    "BR_calf_joint": 0.113,
   },
   joint_vel={".*": 0.0},
 )
