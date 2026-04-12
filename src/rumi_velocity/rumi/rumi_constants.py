@@ -34,7 +34,7 @@ def get_spec() -> mujoco.MjSpec:
 # Actuator config.
 ##
 
-EFFORT_LIMIT = 6.0
+EFFORT_LIMIT = 4.0    # Continuous - 4, Stall - 6
 ARMATURE = 0.01623
 FRICTIONLOSS = 0.001
 JOINT_DAMPING = 0.59436
