@@ -87,7 +87,7 @@
       <!-- <geom class="collision" size="0.04" fromto="0.0 -0.054 0 -0.28 -0.054 0" type="capsule"/> -->
       
       <!-- Extra weight representing components, can also be used to move the COM forwards -->
-      <!-- <body name="HEAD" pos="0.0 -0.054 0.045" quat="1 0 0 0">
+      <!-- <body name="HEAD" pos="-0.28 -0.054 0.065" quat="1 0 0 0">
         <geom type="box" size="0.02 0.02 0.02" material="body_mat"/>
         <inertial pos="0 0 0" mass="0.8" diaginertia="0.0001 0.002 0.002"/>
       </body> -->
