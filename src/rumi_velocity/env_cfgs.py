@@ -11,6 +11,7 @@ from mjlab.managers.observation_manager import ObservationTermCfg
 from mjlab.managers.reward_manager import RewardTermCfg
 from mjlab.managers.termination_manager import TerminationTermCfg
 from mjlab.sensor import ContactMatch, ContactSensorCfg
+from mjlab.utils.noise import ImuFreezeGroupNoiseCfg
 from mjlab.utils.noise import UniformNoiseCfg as Unoise
 from mjlab.tasks.velocity import mdp
 from mjlab.tasks.velocity.velocity_env_cfg import make_velocity_env_cfg
@@ -34,12 +35,14 @@ VELOCITY_RANGES = UniformVelocityCommandCfg.Ranges(
   heading=(-math.pi, math.pi),
 )
 
-# VELOCITY_CURRICULUM = [
-#   {"step": 0,          "lin_vel_x": (-0.2, 0.2), "lin_vel_y": (-0.2, 0.2), "ang_vel_z": (-0.2, 0.2)},
-#   {"step": 1000*24,    "lin_vel_x": (-0.4, 0.4), "lin_vel_y": (-0.4, 0.4), "ang_vel_z": (-0.4, 0.4)},
-#   {"step": 2000*24,    "lin_vel_x": (-0.6, 0.6), "lin_vel_y": (-0.6, 0.6), "ang_vel_z": (-0.6, 0.6)},
-#   {"step": 3000*24,    "lin_vel_x": (-0.8, 0.8), "lin_vel_y": (-0.8, 0.8), "ang_vel_z": (-0.8, 0.8)},
-#   {"step": 4000*24,    "lin_vel_x": (-1.0, 1.0), "lin_vel_y": (-1.0, 1.0), "ang_vel_z": (-1.0, 1.0)},
+# VELOCITY_CURRICULUM = [                                                                                                                                                                                                                  
+#   {"step": 0,           "lin_vel_x": ( 0.0,  0.0), "lin_vel_y": (0.0, 0.0), "ang_vel_z": (0.0, 0.0)},                                                                                                                                    
+#   {"step": 1000 * 24,   "lin_vel_x": (-0.1,  0.1), "lin_vel_y": (0.0, 0.0), "ang_vel_z": (0.0, 0.0)},                                                                                                                                    
+#   {"step": 2500 * 24,   "lin_vel_x": (-0.2,  0.2), "lin_vel_y": (0.0, 0.0), "ang_vel_z": (0.0, 0.0)},                                                                                                                                    
+#   {"step": 4000 * 24,   "lin_vel_x": (-0.3,  0.3), "lin_vel_y": (0.0, 0.0), "ang_vel_z": (0.0, 0.0)},                                                                                                                                    
+#   {"step": 5500 * 24,   "lin_vel_x": (-0.5,  0.5), "lin_vel_y": (0.0, 0.0), "ang_vel_z": (0.0, 0.0)},                                                                                                                                    
+#   {"step": 7500 * 24,   "lin_vel_x": (-0.5,  0.5), "lin_vel_y": (0.0, 0.0), "ang_vel_z": (-0.1, 0.1)},                                                                                                                                   
+#   {"step": 9000 * 24,   "lin_vel_x": (-0.5,  0.5), "lin_vel_y": (0.0, 0.0), "ang_vel_z": (-0.3, 0.3)},                                                                                                                                   
 # ]
 
 ##
@@ -128,6 +131,11 @@ def _configure_rumi(cfg: ManagerBasedRlEnvCfg, play: bool = False) -> None:
     params={"sensor_name": "robot/imu_lin_acc"},
   )
 
+  # Coordinated IMU freeze simulation: holds gravity+gyro+accel together for
+  # 1-150 steps (BNO080 hard-reset), plus 5% single-frame dropout and 2%
+  # large gravity spikes. Gated by enable_corruption; no effect in play mode.
+  cfg.observations["actor"].imu_noise_model = ImuFreezeGroupNoiseCfg()
+
   cfg.events["foot_friction"].params["asset_cfg"].geom_names = geom_names
   cfg.events["base_com"].params["asset_cfg"].body_names = ("body",)
 
@@ -174,10 +182,10 @@ def _configure_rumi(cfg: ManagerBasedRlEnvCfg, play: bool = False) -> None:
   cfg.rewards["foot_swing_height"].weight = 0.0
   
   # New reward/penalty for joint-torque optimization
-  cfg.rewards["joint_torques_l2"] = RewardTermCfg(                                                                                                                                                                                         
-    func=envs_mdp.joint_torques_l2,                                                                                                                                                                                                        
-    weight=-1e-4,
-  )
+  # cfg.rewards["joint_torques_l2"] = RewardTermCfg(                                                                                                                                                                                         
+  #   func=envs_mdp.joint_torques_l2,                                                                                                                                                                                                        
+  #   weight=-1e-4,
+  # )
 
   cfg.terminations["illegal_contact"] = TerminationTermCfg(
     func=mdp.illegal_contact,
@@ -205,14 +213,14 @@ def _configure_rumi(cfg: ManagerBasedRlEnvCfg, play: bool = False) -> None:
     # Effectively infinite episode length.
     cfg.episode_length_s = int(1e9)
 
-    cfg.observations["actor"].enable_corruption = False
+    cfg.observations["actor"].enable_corruption = True
     cfg.events.pop("push_robot", None)
     cfg.curriculum = {}
-    cfg.events["randomize_terrain"] = EventTermCfg(
-      func=envs_mdp.randomize_terrain,
-      mode="reset",
-      params={},
-    )
+    # cfg.events["randomize_terrain"] = EventTermCfg(
+    #   func=envs_mdp.randomize_terrain,
+    #   mode="reset",
+    #   params={},
+    # )
 
 
 def rumi_rough_env_cfg(play: bool = False) -> ManagerBasedRlEnvCfg:
@@ -280,7 +288,7 @@ def rumi_flat_env_cfg(play: bool = False) -> ManagerBasedRlEnvCfg:
   if play:
     twist_cmd = cfg.commands["twist"]
     assert isinstance(twist_cmd, RumiVelocityCommandCfg)
-    twist_cmd.ranges.lin_vel_x = (-0.5, 0.5)
+    twist_cmd.ranges.lin_vel_x = (-0.0, 0.0)
     twist_cmd.ranges.lin_vel_y = (-0.0, 0.0)
     twist_cmd.ranges.ang_vel_z = (-0.0, 0.0)
 
