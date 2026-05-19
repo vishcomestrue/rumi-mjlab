@@ -30,21 +30,16 @@ from rumi_velocity.rumi.rumi_constants import (
 
 VELOCITY_RANGES = UniformVelocityCommandCfg.Ranges(
   lin_vel_x=(-0.5, 0.5),
-  lin_vel_y=(-0.0, 0.0),
-  ang_vel_z=(-0.0, 0.0),
+  lin_vel_y=(-0.5, 0.5),
+  ang_vel_z=(-1.57, 1.57),
   heading=(-math.pi, math.pi),
 )
 
-# VELOCITY_CURRICULUM = [                                                                                                                                                                                                                  
-#   {"step": 0,           "lin_vel_x": ( 0.0,  0.0), "lin_vel_y": (0.0, 0.0), "ang_vel_z": (0.0, 0.0)},                                                                                                                                    
-#   {"step": 1000 * 24,   "lin_vel_x": (-0.1,  0.1), "lin_vel_y": (0.0, 0.0), "ang_vel_z": (0.0, 0.0)},                                                                                                                                    
-#   {"step": 2500 * 24,   "lin_vel_x": (-0.2,  0.2), "lin_vel_y": (0.0, 0.0), "ang_vel_z": (0.0, 0.0)},                                                                                                                                    
-#   {"step": 4000 * 24,   "lin_vel_x": (-0.3,  0.3), "lin_vel_y": (0.0, 0.0), "ang_vel_z": (0.0, 0.0)},                                                                                                                                    
-#   {"step": 5500 * 24,   "lin_vel_x": (-0.5,  0.5), "lin_vel_y": (0.0, 0.0), "ang_vel_z": (0.0, 0.0)},                                                                                                                                    
-#   {"step": 7500 * 24,   "lin_vel_x": (-0.5,  0.5), "lin_vel_y": (0.0, 0.0), "ang_vel_z": (-0.1, 0.1)},                                                                                                                                   
-#   {"step": 9000 * 24,   "lin_vel_x": (-0.5,  0.5), "lin_vel_y": (0.0, 0.0), "ang_vel_z": (-0.3, 0.3)},                                                                                                                                   
-# ]
-
+VELOCITY_CURRICULUM = [                                                                                                                                                                                                                  
+  {"step": 0,           "lin_vel_x": (-0.5,  0.5), "lin_vel_y": (0.0, 0.0), "ang_vel_z": (0.0, 0.0)},                                                                                                                                   
+  {"step": 3000 * 24,   "lin_vel_x": (-0.5,  0.5), "lin_vel_y": (-0.5, 0.5), "ang_vel_z": (0.0, 0.0)},                                                                                                                                   
+  {"step": 6000 * 24,   "lin_vel_x": (-0.5,  0.5), "lin_vel_y": (-0.5, 0.5), "ang_vel_z": (-1.57, 1.57)},
+]
 ##
 # Reward curriculum (edit here to change reward weight progression)
 ##
@@ -288,8 +283,8 @@ def rumi_flat_env_cfg(play: bool = False) -> ManagerBasedRlEnvCfg:
   if play:
     twist_cmd = cfg.commands["twist"]
     assert isinstance(twist_cmd, RumiVelocityCommandCfg)
-    twist_cmd.ranges.lin_vel_x = (-0.0, 0.0)
-    twist_cmd.ranges.lin_vel_y = (-0.0, 0.0)
-    twist_cmd.ranges.ang_vel_z = (-0.0, 0.0)
+    twist_cmd.ranges.lin_vel_x = (-0.5, 0.5)
+    twist_cmd.ranges.lin_vel_y = (-0.5, 0.5)
+    twist_cmd.ranges.ang_vel_z = (-1.57, 1.57)
 
   return cfg
